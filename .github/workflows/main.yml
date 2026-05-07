@@ -1,0 +1,43 @@
+name: CI/CD to Azure Container Apps
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Login to Azure Container Registry
+      - name: Login to Azure Container Registry
+        uses: azure/docker-login@v2
+        with:
+          login-server: ${{ secrets.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      # Build Docker image
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t ${{ secrets.ACR_LOGIN_SERVER }}/neuropattern-api:${{ github.sha }} \
+            .
+
+          docker tag \
+            ${{ secrets.ACR_LOGIN_SERVER }}/neuropattern-api:${{ github.sha }} \
+            ${{ secrets.ACR_LOGIN_SERVER }}/neuropattern-api:latest
+
+      # Push Docker images to ACR
+      - name: Push Docker images
+        run: |
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/neuropattern-api:${{ github.sha }}
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/neuropattern-api:latest
