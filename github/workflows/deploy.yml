@@ -1,26 +1,35 @@
-name: Deploy to Azure Container App
+name: Build and Deploy to Azure
 
 on:
   push:
     branches:
-      - main
+      - main  # Change to 'master' if your default branch is named master
 
 jobs:
-  build-and-deploy:
+  build-and-push:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      # 1. Check out the source code from your GitHub repo
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Log in to Azure
-        uses: azure/login@v1
+      # 2. Log in to your Azure Container Registry using the secrets you created
+      - name: Log in to Azure Container Registry
+        uses: azure/docker-login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          login-server: ${{ secrets.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
 
-      - name: Build and Push Image
-        uses: azure/container-apps-deploy-action@v1
-        with:
-          appSourcePath: ${{ github.workspace }}
-          acrName: your_acr_name # نام ACR که در Azure می‌سازی
-          containerAppName: neuropattern-app
-          resourceGroup: your_resource_group
-          imageToBuild: your_acr_name.azurecr.io/neuropattern-api:${{ github.sha }}
+      # 3. Build the Docker image and Tag it
+      # We use the GitHub SHA (unique ID) as a tag to track versions
+      - name: Build Docker image
+        run: |
+          docker build . -t ${{ secrets.ACR_LOGIN_SERVER }}/neuropattern-api:${{ github.sha }}
+          docker tag ${{ secrets.ACR_LOGIN_SERVER }}/neuropattern-api:${{ github.sha }} ${{ secrets.ACR_LOGIN_SERVER }}/neuropattern-api:latest
+
+      # 4. Push the image to Azure
+      - name: Push image to ACR
+        run: |
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/neuropattern-api:${{ github.sha }}
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/neuropattern-api:latest
