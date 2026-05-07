@@ -1,4 +1,4 @@
-name: Build and Push to Azure
+name: CI/CD to Azure Container Apps
 
 on:
   push:
@@ -9,7 +9,7 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,12 +23,12 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
-      - name: Build Docker image
+      - name: Build image
         run: |
           docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/neuropattern-api:${{ github.sha }} .
           docker tag ${{ secrets.ACR_LOGIN_SERVER }}/neuropattern-api:${{ github.sha }} ${{ secrets.ACR_LOGIN_SERVER }}/neuropattern-api:latest
 
-      - name: Push Docker image
+      - name: Push image
         run: |
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/neuropattern-api:${{ github.sha }}
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/neuropattern-api:latest
