@@ -1,0 +1,26 @@
+name: Deploy to Azure Container App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Build and Push Image
+        uses: azure/container-apps-deploy-action@v1
+        with:
+          appSourcePath: ${{ github.workspace }}
+          acrName: your_acr_name # نام ACR که در Azure می‌سازی
+          containerAppName: neuropattern-app
+          resourceGroup: your_resource_group
+          imageToBuild: your_acr_name.azurecr.io/neuropattern-api:${{ github.sha }}

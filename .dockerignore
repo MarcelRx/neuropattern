@@ -1,0 +1,26 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Local configuration & database dumps
+.env
+*.sql
+.git/
+.github/
+.gitignore
+
+# Frontend files (These shouldn't live in your backend container)
+node_modules/
+dist/
+src/
+public/
+vite.config.ts
+package.json
+package-lock.json
+
+# Temporary local media
+static/audio/*
