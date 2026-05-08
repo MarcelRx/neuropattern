@@ -18,21 +18,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 1. Login to Azure (Required for deployment)
+      # 1. Login to Azure using the Service Principal Secret
       - name: Azure Login
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # 2. Login to ACR
-      - name: Login to Azure Container Registry
+      # 2. Login to your Azure Container Registry
+      - name: Login to ACR
         uses: azure/docker-login@v2
         with:
           login-server: ${{ secrets.ACR_LOGIN_SERVER }}
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
-      # 3. Build and Push Image
+      # 3. Build the Docker Image and tag it with the Commit SHA
       - name: Build and Push Docker Image
         run: |
           IMAGE_TAG=${{ secrets.ACR_LOGIN_SERVER }}/neuropattern-api:${{ github.sha }}
@@ -41,7 +41,7 @@ jobs:
           docker push $IMAGE_TAG
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/neuropattern-api:latest
 
-      # 4. Deploy to Container App
+      # 4. Deploy the new image to the Container App
       - name: Deploy to Azure Container Apps
         uses: azure/container-apps-deploy-action@v1
         with:
