@@ -1,0 +1,117 @@
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: neuropattern-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      # SECURITY WARNING: These defaults are for LOCAL DEVELOPMENT ONLY.
+      # In production, ALWAYS set MONGO_INITDB_ROOT_USERNAME and MONGO_INITDB_ROOT_PASSWORD environment variables.
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-root}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-changeme}
+      MONGO_INITDB_DATABASE: neuropattern
+      # Application user credentials (least-privilege access to neuropattern database only)
+      MONGO_APP_USER: ${MONGO_APP_USER:-neuropattern_app}
+      MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD:-app_changeme_in_production}
+    volumes:
+      - mongo_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - neuropattern-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: backend
+    container_name: neuropattern-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      # SECURITY WARNING: In production, ALWAYS set MONGODB_URI explicitly or use application credentials.
+      # For local development, the default uses the MongoDB application user credentials from the mongodb service.
+      # If MONGO_APP_USER and MONGO_APP_PASSWORD are set, the backend will use those (least-privilege).
+      # Otherwise, it falls back to root credentials (not recommended for production).
+      MONGODB_URI: ${MONGODB_URI:-mongodb://${MONGO_APP_USER:-neuropattern_app}:${MONGO_APP_PASSWORD:-app_changeme_in_production}@mongodb:27017/neuropattern?authSource=neuropattern}
+      # Or use components (config.py will build URI):
+      # DB_HOST: mongodb
+      # DB_PORT: 27017
+      # DB_NAME: neuropattern
+      # DB_USER: ${DB_USER:-${MONGO_APP_USER}}
+      # DB_PASSWORD: ${DB_PASSWORD:-${MONGO_APP_PASSWORD}}
+
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      GROQ_MODEL: ${GROQ_MODEL:-llama-3.3-70b-specdec}
+      ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY}
+      ELEVENLABS_VOICE_ID: ${ELEVENLABS_VOICE_ID:-BpjGufoPiobT79j2vtj4}
+      ELEVENLABS_MODEL_ID: ${ELEVENLABS_MODEL_ID:-eleven_multilingual_v2}
+
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      FROM_EMAIL: ${FROM_EMAIL:-noreply@neuropattern.app}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8000}
+
+      # SECURITY WARNING: In production, ALWAYS set SECRET_KEY and JWT_SECRET_KEY explicitly.
+      # For local development, these defaults allow the application to start.
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-change-in-production}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-jwt-secret-change-in-production}
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      DEBUG: ${DEBUG:-1}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    volumes:
+      - static_audio:/app/static/audio
+    networks:
+      - neuropattern-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    image: node:22-alpine
+    container_name: neuropattern-frontend
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      VITE_API_URL: http://localhost:8000/api/v1
+      VITE_FRONTEND_URL: http://localhost:3000
+    command: >
+      sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install && pnpm run frontend"
+    depends_on:
+      - backend
+    networks:
+      - neuropattern-network
+    profiles:
+      - dev
+
+volumes:
+  mongo_data:
+    driver: local
+  static_audio:
+    driver: local
+
+networks:
+  neuropattern-network:
+    driver: bridge

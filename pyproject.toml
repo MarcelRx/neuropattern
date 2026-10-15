@@ -1,0 +1,51 @@
+[tool.watchfiles]
+extend_ignore_paths = ["venv", "node_modules", "dist", ".git", "**/__pycache__"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "F",     # pyflakes
+    "I",     # isort
+    "B",     # flake8-bugbear
+    "C4",    # flake8-comprehensions
+    "UP",    # pyupgrade
+    "ARG",   # flake8-unused-arguments
+    "SIM",   # flake8-simplify
+    "PIE",   # flake8-pie
+    "RUF",   # Ruff-specific rules
+    "G",     # flake8-logging-format
+    "BLE",   # flake8-blind-except
+]
+
+ignore = [
+    "B008",  # Do not perform function calls in argument defaults (FastAPI Depends/File/Form are intentional)
+    "G004",  # Logging statement uses f-string (acceptable for debug logging)
+    "E501",  # Line too long (handled by formatter if needed)
+    "B904",  # Exception chaining (acceptable for current error handling patterns)
+    "ARG001",  # Unused function arguments (FastAPI lifecycle handlers may need args)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"backend/tests/*.py" = [
+    "BLE001",  # Allow broad exception handling in tests
+]
+"backend/app/api/v1/endpoints/coach.py" = [
+    "BLE001",  # Allow broad exception handling for TTS errors that shouldn't fail requests
+]
+"backend/app/api/v1/endpoints/auth.py" = [
+    "BLE001",  # Allow broad exception handling for email failures that shouldn't block registration
+]
+"backend/app/api/v1/endpoints/habits.py" = [
+    "BLE001",  # Allow broad exception handling for invalid ObjectId conversion
+]
+"backend/app/main.py" = [
+    "BLE001",  # Allow broad exception handling for health check
+]
+"backend/app/api/services/ai_service.py" = [
+    "BLE001",  # Allow broad exception handling for Groq API errors that must return fallback values
+]

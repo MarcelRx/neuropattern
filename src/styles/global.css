@@ -1,0 +1,106 @@
+/* Global style reset and design tokens */
+:root {
+  color-scheme: dark;
+  font-family: "Inter", sans-serif;
+  font-size: 16px;
+  background-color: #0f172a;
+  color: #f8fafc;
+  --bg-surface: rgba(30, 41, 59, 0.95);
+  --bg-surface-soft: rgba(15, 23, 42, 0.85);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --primary: #3d99f5;
+  --secondary: #10b981;
+  --accent-purple: #8b5cf6;
+  --accent-orange: #f97316;
+  --text-muted: #94a3b8;
+  --shadow-soft: 0 24px 80px rgba(0, 0, 0, 0.16);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  line-height: 1.5;
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(61, 153, 245, 0.16),
+      transparent 24%
+    ),
+    radial-gradient(
+      circle at bottom left,
+      rgba(16, 185, 129, 0.12),
+      transparent 18%
+    ),
+    #0f172a;
+  color: #f8fafc;
+  font-family: "Inter", sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+::selection {
+  background: rgba(61, 153, 245, 0.35);
+  color: #ffffff;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.glass-panel {
+  background: rgba(30, 41, 59, 0.68);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.gauge-circle {
+  transition: stroke-dashoffset 1s ease-in-out;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+@media (max-width: 768px) {
+  body {
+    font-size: 15px;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}

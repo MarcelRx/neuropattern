@@ -1,0 +1,7 @@
+{
+  "name": "NeuroPattern LifeTracker",
+  "description": "AI-powered life tracking application analyzing voice, habits, and health metrics.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

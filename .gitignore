@@ -1,0 +1,50 @@
+# Dependency directories
+node_modules/
+jspm_packages/
+venv/
+.venv/
+env/
+lib/
+bin/
+include/
+
+# Build outputs
+dist/
+build/
+.cache/
+.next/
+
+# Environment variables (Crucial: never commit these)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# Python specifics
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Project specific generated files
+backend/app/static/audio/**
+!backend/app/static/audio/.gitkeep
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# Internal audit reports (keep out of public repository)
+FINAL_AUDIT_REPORT.md
+FINAL_REPORT.md
+INITIAL_FINDINGS.md
+PRE_COMMIT_VERIFICATION_REPORT.md
+RELEASE_CHECKLIST.md
