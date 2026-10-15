@@ -71,11 +71,10 @@ class SecurityManager:
 
         # Debug logging
         auth_header = request.headers.get("authorization", "")
-        logger.debug(
-            "[Auth] Authorization header present"
-            if auth_header
-            else "[Auth] No Authorization header"
-        )
+        if auth_header:
+            logger.debug("[Auth] Authorization header present")
+        else:
+            logger.debug("[Auth] No Authorization header")
 
         # Manual extraction fallback
         if not token and auth_header.startswith("Bearer "):

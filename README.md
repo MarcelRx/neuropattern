@@ -388,23 +388,35 @@ The backend has a growing test suite organized in `backend/tests/` with 40 tests
 ### Running Tests
 
 ```bash
-# Backend tests (Python)
+# Backend unit tests (no MongoDB required)
 source venv/bin/activate
-PYTHONPATH=/Users/mohsenrassam/Desktop/neuropattern/backend pytest backend/tests/ -v
+PYTHONPATH=backend python -m pytest backend/tests/ -v -m "not integration"
 
-# Expected output: 1 passed test
+# Backend integration tests (MongoDB required)
+source venv/bin/activate
+PYTHONPATH=backend MONGODB_URI="mongodb://localhost:27017/neuropattern_test" DB_NAME="neuropattern_test" python -m pytest backend/tests/ -v -m "integration"
+
+# Frontend type check
+pnpm run lint
+
+# Frontend build
+pnpm run build
 ```
 
 ### Test Results
 
-| Check               | Command                    | Result     | Evidence                  |
-| ------------------- | -------------------------- | ---------- | ------------------------- |
-| Backend unit tests  | `pytest backend/tests/ -v` | PASS (1/1) | test_settings_load passed |
-| Frontend unit tests | Not implemented            | NOT RUN    | No test files exist       |
-| Integration tests   | Not implemented            | NOT RUN    | No test files exist       |
-| E2E tests           | Not implemented            | NOT RUN    | No test files exist       |
+| Check                     | Command                                         | Result       | Evidence                                   |
+| ------------------------- | ----------------------------------------------- | ------------ | ------------------------------------------ |
+| Backend unit tests        | `pytest backend/tests/ -v -m "not integration"` | PASS (40/40) | All tests passed                           |
+| Backend integration tests | `pytest backend/tests/ -v -m "integration"`     | PASS (15/15) | All integration tests passed (MongoDB)     |
+| Frontend type check       | `pnpm run lint`                                 | PASS         | TypeScript compilation successful          |
+| Frontend build            | `pnpm run build`                                | PASS         | Production build successful                |
+| Python linting            | `ruff check backend/`                           | PASS         | All checks passed                          |
+| CI/CD workflow            | GitHub Actions                                  | PASS         | Run 38726521166 succeeded (commit 9378351) |
 
-**Note:** Test coverage is insufficient for production readiness. Additional tests are recommended for:
+**Note:** The CI/CD workflow status above reflects the last successful GitHub Actions run on commit `937835193d8c035436abcabed64e8b26f46d1233`. Current local changes have not yet been validated by CI.
+
+**Note:** Test coverage is reasonable for an MVP portfolio project. Additional tests are recommended for:
 
 - API endpoint validation
 - Authentication flows

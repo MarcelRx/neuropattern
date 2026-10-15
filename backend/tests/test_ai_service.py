@@ -34,25 +34,22 @@ def test_ai_service_initializes_with_groq_key():
             del os.environ["GROQ_API_KEY"]
 
 
-def test_ai_service_handles_missing_elevenlabs_key():
-    """Test that voice generation returns None when ElevenLabs API key is not configured."""
-    # Ensure ElevenLabs API key is not set
-    if "ELEVENLABS_API_KEY" in os.environ:
-        del os.environ["ELEVENLABS_API_KEY"]
+def test_ai_service_handles_missing_elevenlabs_key(monkeypatch):
+    """Voice generation returns None when the ElevenLabs API key is missing."""
+    # Remove the key from both the environment and cached settings.
+    monkeypatch.delenv("ELEVENLABS_API_KEY", raising=False)
+    monkeypatch.setattr(
+        "app.api.services.ai_service.settings.ELEVENLABS_API_KEY",
+        "",
+    )
 
-    # Set Groq key for service initialization
-    os.environ["GROQ_API_KEY"] = "gsk_test_key_12345"
+    # Provide a Groq key so service initialization remains independent.
+    monkeypatch.setenv("GROQ_API_KEY", "gsk_test_key_12345")
 
-    try:
-        service = AIService()
-        result = service.generate_voice_response("Hello world", "test_file")
-        assert result is None
-    finally:
-        # Clean up
-        if "GROQ_API_KEY" in os.environ:
-            del os.environ["GROQ_API_KEY"]
-        if "ELEVENLABS_API_KEY" in os.environ:
-            del os.environ["ELEVENLABS_API_KEY"]
+    service = AIService()
+    result = service.generate_voice_response("Hello world", "test_file")
+
+    assert result is None
 
 
 def test_ai_service_returns_default_when_no_client():

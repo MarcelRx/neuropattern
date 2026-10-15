@@ -48,3 +48,6 @@ FINAL_REPORT.md
 INITIAL_FINDINGS.md
 PRE_COMMIT_VERIFICATION_REPORT.md
 RELEASE_CHECKLIST.md
+
+# Legacy test audio artifacts
+backend/static/audio/**

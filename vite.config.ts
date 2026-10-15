@@ -3,19 +3,25 @@ import path from "path";
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  root: path.resolve(__dirname, "src"), // Set src as the root directory
+  root: path.resolve(__dirname, "src"),
+
   server: {
     port: 3000,
     host: "0.0.0.0",
   },
+
   plugins: [react()],
+
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
     },
   },
+
   build: {
     outDir: path.resolve(__dirname, "dist"),
+    emptyOutDir: true,
+
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -28,6 +34,7 @@ export default defineConfig({
             ) {
               return "vendor-react";
             }
+
             if (id.includes("recharts")) {
               return "vendor-charts";
             }
@@ -35,7 +42,7 @@ export default defineConfig({
         },
       },
     },
-    // Incremented limit slightly to accommodate the framework baseline
+
     chunkSizeWarningLimit: 800,
   },
 });
